@@ -13,7 +13,7 @@ class ViewController: UIViewController, UITableViewDataSource {
     
     @IBOutlet weak var tableView: UITableView!
     
-    var names: [NSManagedObject] = []
+    var names: [Strings] = []
     
     @IBAction func addButton(sender: AnyObject) {
        let alert = UIAlertController(title: "Add String", message: "Add new String", preferredStyle: .Alert)
@@ -51,7 +51,7 @@ class ViewController: UIViewController, UITableViewDataSource {
         var err: NSError?
         
         do {
-            names = try context.executeFetchRequest(request) as! [NSManagedObject]
+            names = try context.executeFetchRequest(request) as! [Strings]
             
         }catch let err1 as NSError {
             err = err1
@@ -75,7 +75,7 @@ class ViewController: UIViewController, UITableViewDataSource {
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let context = delegate.managedObjectContext
         
-        let nameString = NSEntityDescription.insertNewObjectForEntityForName("Strings", inManagedObjectContext: context)
+        let nameString = NSEntityDescription.insertNewObjectForEntityForName("Strings", inManagedObjectContext: context) as! Strings
         
         nameString.setValue(name, forKey: "stringName")
         
@@ -110,8 +110,7 @@ class ViewController: UIViewController, UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath);
-        let name = names[indexPath.row]
-        cell.textLabel?.text = name.valueForKey("stringName") as? String
+        cell.textLabel?.text = names[indexPath.row].stringName
         return cell
         
     }
