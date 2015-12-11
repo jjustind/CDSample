@@ -13,13 +13,13 @@ class ViewController: UIViewController, UITableViewDataSource {
     
     @IBOutlet weak var tableView: UITableView!
     
-    var names: [String] = []
+    var names: [NSManagedObject] = []
     
     @IBAction func addButton(sender: AnyObject) {
        let alert = UIAlertController(title: "Add String", message: "Add new String", preferredStyle: .Alert)
         let save = UIAlertAction(title: "Save", style: .Default) { (action: UIAlertAction) -> Void in
             let textField = alert.textFields![0] as UITextField
-            self.names.append(textField.text!)
+            self.saveString(textField.text!)
             self.tableView.reloadData()
         }
         
@@ -40,14 +40,60 @@ class ViewController: UIViewController, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context = delegate.managedObjectContext
+        
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier:"Cell")
         title = "Basic String Storage"
+        
+        let request = NSFetchRequest(entityName: "Strings")
+        
+        var err: NSError?
+        
+        do {
+            names = try context.executeFetchRequest(request) as! [NSManagedObject]
+            
+        }catch let err1 as NSError {
+            err = err1
+        }
+        
+        if err != nil{
+            print("Unable to load data:")
+            print(err)
+            
+        }
+
         
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func saveString(name: String){
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context = delegate.managedObjectContext
+        
+        let nameString = NSEntityDescription.insertNewObjectForEntityForName("Strings", inManagedObjectContext: context)
+        
+        nameString.setValue(name, forKey: "stringName")
+        
+        var err: NSError?
+        
+        do {
+            try context.save()
+            self.names.append(nameString)
+        }catch let err1 as NSError {
+            err = err1
+        }
+        
+        if err != nil{
+            print("Unable to save data:")
+            print(err)
+            
+        }
+
     }
     
     
@@ -64,7 +110,8 @@ class ViewController: UIViewController, UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath);
-        cell.textLabel?.text = names[indexPath.row]
+        let name = names[indexPath.row]
+        cell.textLabel?.text = name.valueForKey("stringName") as? String
         return cell
         
     }
